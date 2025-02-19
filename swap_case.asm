@@ -92,9 +92,56 @@ Exit:
 
 # YOU CAN ONLY MODIFY THIS FILE FROM THIS POINT ONWARDS:
 SwapCase:
-    #TODO: write your code here, $a0 stores the address of the string
-    
-    # Do not remove the "jr $ra" line below!!!
-    # It should be the last line in your function code!
-    
+    addi $sp, $sp, -8     
+    sw $s0, 0($sp)
+    sw $ra, 4($sp)
+    move $s0, $a0
+
+loop:
+    lbu $t0, 0($s0)
+    beqz $t0, exitloop
+
+    li $t1, 65
+    li $t2, 90
+    blt $t0, $t1, check_lower
+    bgt $t0, $t2, check_lower
+
+    # Add 32
+    ori $t0, $t0, 32  
+    j swap_done
+
+check_lower:
+    li $t1, 97
+    li $t2, 122
+    blt $t0, $t1, next_char
+    bgt $t0, $t2, next_char
+
+    # Subtract 32
+    li $t3, 32           
+    sub $t0, $t0, $t3    
+
+swap_done:
+    lbu $a0, 0($s0)
+    li $v0, 11
+    syscall
+    la $a0, newline
+    li $v0, 4
+    syscall
+    li $v0, 11
+    move $a0, $t0
+    syscall
+    la $a0, newline
+    li $v0, 4
+    syscall
+    sb $t0, 0($s0)    
+    jal ConventionCheck
+
+next_char:
+    addi $s0, $s0, 1
+    j loop
+
+exitloop:
+    lw $s0, 0($sp)
+    lw $ra, 4($sp)
+    addi $sp, $sp, 8
     jr $ra
